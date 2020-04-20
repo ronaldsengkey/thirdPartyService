@@ -1,0 +1,239 @@
+openapi: 3.0.1
+info:
+  title: Registration
+  description: Registration global service
+  termsOfService: http://swagger.io/terms/
+  contact:
+    email: agnetiuslee@gmail.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+servers:
+- url: https://usahakreatifindonesia.co.id/register
+security:
+- secret_key: []
+tags:
+- name: producer
+  description: Producer Message 
+- name: consumer
+  description: Consumer Message
+basePath: "/thirdparty"
+paths:
+  
+  /google/calendar:
+    post:
+      tags:
+      - "Google add calendar event"
+      summary: "Create New Schedule of Presentation"
+      operationId: "createGoogleCalendarEvent"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+      - name: "token"
+        in: "header"
+        required: true
+        type: "string"        
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/createGoogleCalendarEvent'
+      responses:
+        200:
+          description: "request success"
+        406:
+          description: "request"
+        500:
+          description: "internal server error"
+      x-swagger-router-controller: "google"
+    
+    get:
+      tags:
+      - "Presentation Schedule"
+      summary: "Get All Schedule of Presentation"
+      operationId: "getGoogleCalendarEvent"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+      - name: "token"
+        in: "header"
+        required: true
+        type: "string"
+      - name: "param"
+        in: "header"
+        required: true
+        type: "string"
+        description: '{ "maxResult": "10", "employeeId": "42" }'
+      # - in: "body"
+      #   name: "body"
+      #   required: true
+      #   schema:
+      #     $ref: "#/definitions/getPresentationSchedule"
+      responses:
+        200:
+          description: "request success"
+        406:
+          description: "request"
+        500:
+          description: "internal server error"
+      x-swagger-router-controller: "google"
+
+  /google/maps:
+    get:
+      tags:
+      - "google get lat long"
+      summary: "google get long"
+      operationId: "getAddressCoordinate"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+      - name: "token"
+        in: "header"
+        required: true
+        type: "string"
+      - name: "param"
+        in: "header"
+        required: true
+        type: "string"
+        description: '{ "address": "jl. tanjung wira no 19 gresik" }'
+      responses:
+        200:
+          description: "request success"
+        406:
+          description: "request"
+        500:
+          description: "internal server error"
+      x-swagger-router-controller: "google"
+
+  /google/auth:
+    post:
+      tags:
+      - "Google code for save token"
+      summary: "Create New Schedule of Presentation"
+      operationId: "createGoogleToken"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+      - name: "token"
+        in: "header"
+        required: true
+        type: "string"
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/createGoogleToken'
+        required: true        
+      responses:
+        200:
+          description: "request success"
+        406:
+          description: "request"
+        500:
+          description: "internal server error"
+      x-swagger-router-controller: "google"
+
+    get:
+      tags:
+      - "google check auth"
+      summary: "google check auth"
+      operationId: "checkGoogleToken"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+      - name: "token"
+        in: "header"
+        required: true
+        type: "string"
+      - name: "param"
+        in: "header"
+        required: true
+        type: "string"
+        description: '{ "employeeId": "42" }'
+      responses:
+        200:
+          description: "request success"
+        406:
+          description: "request"
+        500:
+          description: "internal server error"
+      x-swagger-router-controller: "google"
+
+components:
+  schemas:
+    createGoogleCalendarEvent:
+      type: "object"
+      properties:
+        employeeId:
+          type: "string"
+          example: "1,2,3"
+        summary:
+          type: "string"
+          example: "Meeting with: Muhamad Syafriansyah"
+        place:
+          type: "string"
+          example: "Pakuwon Center #16-05, Jl. Embong Malang No.4, Kedungdoro, Tegalsari, Surabaya City, East Java 60261"
+        description:
+          type: "string"
+          example: "A chance to hear more about products."
+        date:
+          type: "string"
+          example: "2020-04-15"
+        time:
+          type: "string"
+          example: "10:04"
+        duration:
+          type: "string"
+          example: "1, 2, 3 (in hour)"
+        timeZone:
+          type: "string"
+          example: "Asia/Jakarta"
+        email:
+          type: "string"
+          example: "safriansah@gmail.com"
+        
+    createGoogleToken:
+      type: "object"
+      properties:
+        employeeId:
+          type: "string"
+          example: "1,2,3"
+        code:
+          type: "string"
+          example: "4/ygFmQxktObX5LqwBm6n-_FAqysR_vbK5ZcUgiFoSf5NTgikMM0XqgQfBeaU64Lp_m5Srz0v21s_ZXw03kTYDnuM"
+
+    # consumerSchema:
+    #   type: object
+    #   properties:
+    #     content:
+    #       type: string
+  # securitySchemes:
+  #   petstore_auth:
+  #     type: oauth2
+  #     flows:
+  #       implicit:
+  #         authorizationUrl: http://petstore.swagger.io/oauth/dialog
+  #         scopes:
+  #           write:pets: modify pets in your account
+  #           read:pets: read your pets
+  #   secret_key:
+  #     type: apiKey
+  #     name: SecretKey
+  #     in: header
+  #   oauth_auth:
+  #     type: oauth2
+  #     flows:
+  #       implicit:
+  #         authorizationUrl: https://www.linkedin.com/in/yohanes-ronald-agnetius-sengkey-lee-b174a940/
+  #         scopes:
+  #           read:auth: read authentication
+  #   state:
+  #     type: apiKey
+  #     name: state
+  #     in: header

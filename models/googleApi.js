@@ -1,0 +1,400 @@
+require('dotenv').config();
+
+const fs = require('fs');
+const readline = require('readline');
+const {google} = require('googleapis');
+const mongoose = require('mongoose').set('debug', true);
+const mongoConf = require('../config/mongo');
+const schema = require('../service/googleTokenSchema');
+const moment = require('moment');
+const request = require('request');
+
+// If modifying these scopes, delete token.json.
+const SCOPES = ['https://www.googleapis.com/auth/calendar'];
+// The file token.json stores the user's access and refresh tokens, and is
+// created automatically when the authorization flow completes for the first
+// time.
+const TOKEN_PATH = 'token.json';
+
+// Load client secrets from a local file.
+// fs.readFile('credentials.json', (err, content) => {
+//   if (err) return console.log('Error loading client secret file:', err);
+//   // Authorize a client with credentials, then call the Google Calendar API.
+// //   authorize(JSON.parse(content), listEvents);
+//   authorize(JSON.parse(content), insertEvent);
+// });
+
+/**
+ * Create an OAuth2 client with the given credentials, and then execute the
+ * given callback function.
+ * @param {Object} credentials The authorization client credentials.
+ * @param {function} callback The callback to call with the authorized client.
+ */
+// function authorize(credentials, callback) {
+//   const {client_secret, client_id, redirect_uris} = credentials.installed;
+//   const oAuth2Client = new google.auth.OAuth2(
+//       client_id, client_secret, redirect_uris[1] + ':8101/googleCalendar/token/id'
+//       );
+
+//   // Check if we have previously stored a token.
+//   fs.readFile(TOKEN_PATH, (err, token) => {
+//     if (err) return getAccessToken(oAuth2Client, callback);
+//     oAuth2Client.setCredentials(JSON.parse(token));
+//     callback(oAuth2Client);
+//   });
+// }
+
+/**
+ * Get and store new token after prompting for user authorization, and then
+ * execute the given callback with the authorized OAuth2 client.
+ * @param {google.auth.OAuth2} oAuth2Client The OAuth2 client to get token for.
+ * @param {getEventsCallback} callback The callback for the authorized client.
+ */
+// function getAccessToken(oAuth2Client, callback) {
+//   const authUrl = oAuth2Client.generateAuthUrl({
+//     access_type: 'offline',
+//     scope: SCOPES,
+//   });
+//   console.log('Authorize this app by visiting this url:', authUrl);
+//   const rl = readline.createInterface({
+//     input: process.stdin,
+//     output: process.stdout,
+//   });
+//   rl.question('Enter the code from that page here: ', (code) => {
+//     rl.close();
+//     oAuth2Client.getToken(code, (err, token) => {
+//       if (err) return console.error('Error retrieving access token', err);
+//       oAuth2Client.setCredentials(token);
+//       // Store the token to disk for later program executions
+//       fs.writeFile(TOKEN_PATH, JSON.stringify(token), (err) => {
+//         if (err) return console.error(err);
+//         console.log('Token stored to', TOKEN_PATH);
+//       });
+//       callback(oAuth2Client);
+//     });
+//   });
+// }
+
+/**
+ * Lists the next 10 events on the user's primary calendar.
+ * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
+ */
+// function listEvents(auth) {
+//   const calendar = google.calendar({version: 'v3', auth});
+//   calendar.events.list({
+//     calendarId: 'primary',
+//     timeMin: (new Date()).toISOString(),
+//     maxResults: 10,
+//     singleEvents: true,
+//     orderBy: 'startTime',
+//   }, (err, res) => {
+//     if (err) return console.log('The API returned an error: ' + err);
+//     const events = res.data.items;
+//     if (events.length) {
+//       console.log('Upcoming 10 events:');
+//       events.map((event, i) => {
+//         const start = event.start.dateTime || event.start.date;
+//         console.log(`${start} - ${event.summary}`);
+//       });
+//     } else {
+//       console.log('No upcoming events found.');
+//     }
+//   });
+// }
+
+// function insertEvent(auth){
+//     const calendar = google.calendar({version: 'v3', auth});
+//     var event = {
+//         'summary': 'Coba dari gcal api',
+//         'location': '800 Howard St., San Francisco, CA 94103',
+//         'description': 'A chance to hear more about Google\'s developer products.',
+//         'start': {
+//             'dateTime': '2020-05-28T09:00:00-07:00',
+//             'timeZone': 'America/Los_Angeles',
+//         },
+//         'end': {
+//             'dateTime': '2020-05-28T17:00:00-07:00',
+//             'timeZone': 'America/Los_Angeles',
+//         },
+//         'recurrence': [
+//             'RRULE:FREQ=DAILY;COUNT=2'
+//         ],
+//         'attendees': [
+//             {'email': 'lpage@example.com'},
+//             {'email': 'sbrin@example.com'},
+//         ],
+//         'reminders': {
+//             'useDefault': false,
+//             'overrides': [
+//             {'method': 'email', 'minutes': 24 * 60},
+//             {'method': 'popup', 'minutes': 10},
+//             ],
+//         },
+//     };
+        
+//     calendar.events.insert({
+//         auth: auth,
+//         calendarId: 'primary',
+//         resource: event,
+//     }, function(err, event) {
+//         if (err) {
+//             console.log('There was an error contacting the Calendar service: ' + err);
+//             return;
+//         }
+//         console.log('Event created: %s', event.htmlLink);
+//     });
+// }
+
+exports.getAuth2Client = function(){
+    const oAuth2Client = new google.auth.OAuth2(
+        process.env.GOOGLE_OAUTH_SYAFRI_ID, process.env.GOOGLE_OAUTH_SYAFRI_SECRET, process.env.GOOGLE_OAUTH_SYAFRI_URL + ':8101/google'
+    );
+    return oAuth2Client;
+}
+
+exports.getAccessTokenUrl = function (oAuth2Client){
+    const authUrl = oAuth2Client.generateAuthUrl({
+        access_type: 'offline',
+        scope: SCOPES,
+    });
+    return {
+        "responseCode": process.env.NOTFOUND_RESPONSE,
+        "responseMessage": "Please login to google first",
+        "data": {
+            "url": authUrl
+        }
+    }
+}
+
+exports.getAuthorize = function (employeeId, oAuth2Client){
+    return new Promise(async function(resolve, reject){
+        try {
+            let token = await getToken(employeeId);
+            if (token) {
+                oAuth2Client.setCredentials(JSON.parse(token));
+                resolve(oAuth2Client);
+            }
+            else {
+                resolve(false);
+            }    
+        } catch (error) {
+            resolve(false);
+        }
+    })
+}
+
+async function getToken (id) {
+    try {
+        let queryParams = {
+            employeeId: id
+        };
+        mongoose.Promise = global.Promise;
+        await mongoose.connect(mongoConf.mongoDb.url);
+        var query = await schema.findOne(queryParams);
+        if (query === null) {
+            return false;
+        } else {
+            console.log("GET NOTIF SUCCESS ", query)
+            return query.token;
+        }
+    } catch (error) {
+        console.log("error create notif", error);
+        return false
+    }
+}
+
+
+//data = {employeeId, code}
+exports.createGoogleToken = function(data, oAuth2Client) {
+    return new Promise(async function(resolve, reject){
+        let response = {};
+        try {
+            console.log('code: ', data.code);
+            const {tokens} = await oAuth2Client.getToken(data.code);
+            let result = await saveToken(data.employeeId, JSON.stringify(tokens));
+            if (result) {
+                response = {
+                    "responseCode": process.env.SUCCESS_RESPONSE,
+                    "responseMessage": "Succes save token"
+                }
+            }
+            else {
+                response = {
+                    "responseCode": process.env.ERRORINTERNAL_RESPONSE,
+                    "responseMessage": "Something wrong please try again!!"
+                }
+            }
+        } catch (error) {
+            console.log('error: ', error);
+            response = {
+                "responseCode": process.env.ERRORINTERNAL_RESPONSE,
+                "responseMessage": "Something wrong with your code"
+            }
+        }
+        resolve(response);
+    })
+}
+
+async function saveToken(employeeId, token){
+    await mongoose.connect(mongoConf.mongoDb.url);
+    var googleToken = new schema({
+        employeeId: employeeId,
+        token: token
+    });
+    await googleToken.save();
+    return googleToken;
+}
+
+exports.insertEvent = function(data, auth){
+    return new Promise(async function(resolve, reject){
+        let response = {}
+        try {
+            const calendar = google.calendar({version: 'v3', auth});
+            var event = {
+                'summary': data.summary,
+                'location': data.place,
+                'description': data.description,
+                'start': {
+                    'dateTime': moment(data.date + 'T' + data.time).format(),
+                    'timeZone': data.timeZone,
+                },
+                'end': {
+                    'dateTime': moment(data.date + 'T' + data.time).add(data.duration, 'hour').format(),
+                    'timeZone': data.timeZone,
+                },  
+                'attendees': [
+                    {'email': data.email},
+                ],
+                'reminders': {
+                    'useDefault': false,
+                    'overrides': [
+                        {'method': 'email', 'minutes': 24 * 60},
+                        {'method': 'popup', 'minutes': 10},
+                    ],
+                },
+            };
+                
+            calendar.events.insert({
+                auth: auth,
+                calendarId: 'primary',
+                resource: event,
+            }, function(err, event) {
+                if (err) {
+                    console.log('There was an error contacting the Calendar service: ' + err);
+                    response = {
+                        "responseCode": process.env.ERRORINTERNAL_RESPONSE,
+                        "responseMessage": "There was an error contacting the Calendar service please try again"
+                    }
+                }
+                else {
+                    console.log('Event created: %s', event);
+                    response = {
+                        "responseCode": process.env.SUCCESS_RESPONSE,
+                        "responseMessage": "Succes save event"
+                    }
+                }
+                resolve(response);
+            });
+        } catch (error) {
+            console.log('error: ', error);
+            response = {
+                "responseCode": process.env.ERRORINTERNAL_RESPONSE,
+                "responseMessage": "There was an error contacting the Calendar service please try again"
+            }
+            resolve(response);
+        } 
+    })
+}
+
+// param = {maxResult}
+exports.listEvents = function(param, auth){
+    return new Promise(async function(resolve, reject){
+        let response = {}
+        try {
+            if (!param.maxResult) {
+                param.maxResult = 10;
+            }
+            const calendar = google.calendar({version: 'v3', auth});
+            calendar.events.list({
+                calendarId: 'primary',
+                timeMin: (new Date()).toISOString(),
+                maxResults: param.maxResult,
+                singleEvents: true,
+                orderBy: 'startTime',
+            }, (err, res) => {
+                if (err) return console.log('The API returned an error: ' + err);
+                const events = res.data.items;
+                if (events.length) {
+                    console.log('Upcoming ' + param.maxResult + ' events:');
+                    events.map((event, i) => {
+                        const start = event.start.dateTime || event.start.date;
+                        console.log(`${start} - ${event.summary}`);
+                    });
+                    response = {
+                        "responseCode": process.env.SUCCESS_RESPONSE,
+                        "responseMessage": "Succes get event",
+                        "data": events
+                    }
+                } else {
+                    console.log('No upcoming events found.');
+                    response = {
+                        "responseCode": process.env.NOTFOUND_RESPONSE,
+                        "responseMessage": "No upcoming events found"
+                    }
+                }
+                resolve(response);
+            });
+        } catch (error) {
+            console.log('error: ', error);
+            response = {
+                "responseCode": process.env.ERRORINTERNAL_RESPONSE,
+                "responseMessage": "Something wrong with pelase try again!!"
+            }
+            resolve(response)
+        }
+    })
+}
+
+exports.getAddressCoordinate = function (data) {
+    return new Promise(function (resolve, reject) {
+        // console.log("url" + "http://" + process.env.AUTHENTICATION_SERVICE_HOST + "/check/" + token);
+        try {
+            let address = data.address.replace(/ /g, "+");
+            let mapsUrl = "https://maps.googleapis.com/maps/api/geocode/json";
+            let key = process.env.GOOGLE_MAPS_API_KEY;
+            request.post({
+                "url": mapsUrl + "?address=" + address + "&key=" + key,
+                "timeout": 0,
+            }, function (error, response, body) {
+                if (error) {
+                    reject(process.env.ERRORINTERNAL_RESPONSE);
+                }
+                let result = JSON.parse(body);
+                console.log('RESULT CHECK TOKEN => ', result)
+                if (result.status == "OK") {
+                    resolve({
+                        "responseCode": process.env.SUCCESS_RESPONSE,
+                        "responseMessage": "Success get map coordinate",
+                        "data": {
+                            "address": result.results[0].formatted_address,
+                            "lat": result.results[0].geometry.location.lat + "",
+                            "long": result.results[0].geometry.location.lng + ""
+                        }
+                    })    
+                }
+                else {
+                    resolve({
+                        "responseCode": process.env.NOTFOUND_RESPONSE,
+                        "responseMessage": "Failed get cordinate data"
+                    })
+                }
+            })
+        } catch (e) {
+            console.log('Error checking token => ', e)
+            reject({
+                "responseCode": process.env.ERRORINTERNAL_RESPONSE,
+                "responseMessage": "Something wrong please try again!!"
+            });
+        }
+    })
+}
