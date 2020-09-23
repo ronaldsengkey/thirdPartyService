@@ -21,6 +21,72 @@ tags:
 basePath: "/thirdparty"
 paths:
   
+  /google/email:
+    get:
+      tags:
+      - "get email"
+      summary: "Get email"
+      operationId: "getGoogleEmail"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+      - name: "employeeId"
+        in: "header"
+        required: true
+        type: "string"
+      - name: "param"
+        in: "header"
+        required: true
+        type: "string"
+        description: '{"id": "", "maxResults": "10", "q": "subject:refund", "labelIds": "UNREAD"}'
+      # - in: "body"
+      #   name: "body"
+      #   required: true
+      #   schema:
+      #     $ref: "#/definitions/getPresentationSchedule"
+      responses:
+        200:
+          description: "request success"
+        406:
+          description: "request"
+        500:
+          description: "internal server error"
+      x-swagger-router-controller: "google"
+    
+    put:
+      tags:
+      - "update email"
+      summary: "update email"
+      operationId: "updateGoogleEmail"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+      - name: "employeeId"
+        in: "header"
+        required: true
+        type: "string"
+      # - name: "param"
+      #   in: "header"
+      #   required: false
+      #   type: "string"
+      #   description: '{"id": "", "maxResults": "10", "q": "subject:refund", "labelIds": "UNREAD"}'
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              required: true
+              $ref: '#/components/schemas/updateGoogleEmail'
+      responses:
+        200:
+          description: "request success"
+        406:
+          description: "request"
+        500:
+          description: "internal server error"
+      x-swagger-router-controller: "google"
+
   /google/calendar:
     post:
       tags:
@@ -66,7 +132,7 @@ paths:
         in: "header"
         required: true
         type: "string"
-        description: '{ "maxResult": "10", "employeeId": "42" }'
+        description: '{ "maxResult": "10" }'
       # - in: "body"
       #   name: "body"
       #   required: true
@@ -119,7 +185,7 @@ paths:
       - "application/xml"
       - "application/json"
       parameters:
-      - name: "token"
+      - name: "employeeId"
         in: "header"
         required: true
         type: "string"
@@ -127,6 +193,7 @@ paths:
         content:
           '*/*':
             schema:
+              required: true
               $ref: '#/components/schemas/createGoogleToken'
         required: true        
       responses:
@@ -147,15 +214,10 @@ paths:
       - "application/xml"
       - "application/json"
       parameters:
-      - name: "token"
+      - name: "employeeId"
         in: "header"
         required: true
         type: "string"
-      - name: "param"
-        in: "header"
-        required: true
-        type: "string"
-        description: '{ "employeeId": "42" }'
       responses:
         200:
           description: "request success"
@@ -167,12 +229,27 @@ paths:
 
 components:
   schemas:
+    updateGoogleEmail:
+      type: "object"
+      properties:
+        # employeeId:
+        #   type: "string"
+        #   example: "1,2,3"
+        id:
+          type: "string"
+          example: "1747707c807ed8ac"
+        removeLabelIds:
+          type: "array"
+          items:
+            type: string
+          example: "['UNREAD']"
+
     createGoogleCalendarEvent:
       type: "object"
       properties:
-        employeeId:
-          type: "string"
-          example: "1,2,3"
+        # employeeId:
+        #   type: "string"
+        #   example: "1,2,3"
         summary:
           type: "string"
           example: "Meeting with: Muhamad Syafriansyah"
@@ -201,9 +278,9 @@ components:
     createGoogleToken:
       type: "object"
       properties:
-        employeeId:
-          type: "string"
-          example: "1,2,3"
+        # employeeId:
+        #   type: "string"
+        #   example: "1,2,3"
         code:
           type: "string"
           example: "4/ygFmQxktObX5LqwBm6n-_FAqysR_vbK5ZcUgiFoSf5NTgikMM0XqgQfBeaU64Lp_m5Srz0v21s_ZXw03kTYDnuM"

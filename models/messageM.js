@@ -23,11 +23,11 @@ async function getMessage (id) {
         if (query === null) {
             return process.env.NOTFOUND_RESPONSE;
         } else {
-            console.log("GET NOTIF SUCCESS ", query)
+            console.log("getMessage: ", query)
             return query;
         }
     } catch (error) {
-        console.log("error create notif", err);
+        console.log("getMessage: ", err);
     }
 }
 
@@ -100,7 +100,7 @@ async function createMessage (data) {
         // await saveStatus.save();
         return message;
     } catch (err) {
-        console.log("error create notif", err);
+        console.log("createMessage: ", err);
     }
 }
 

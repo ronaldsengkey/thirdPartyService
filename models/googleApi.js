@@ -10,7 +10,7 @@ const moment = require('moment');
 const request = require('request');
 
 // If modifying these scopes, delete token.json.
-const SCOPES = ['https://www.googleapis.com/auth/calendar'];
+const SCOPES = ['https://www.googleapis.com/auth/calendar', 'https://www.googleapis.com/auth/gmail.modify'];
 // The file token.json stores the user's access and refresh tokens, and is
 // created automatically when the authorization flow completes for the first
 // time.
@@ -147,7 +147,7 @@ const TOKEN_PATH = 'token.json';
 
 exports.getAuth2Client = function(){
     const oAuth2Client = new google.auth.OAuth2(
-        process.env.GOOGLE_OAUTH_SYAFRI_ID, process.env.GOOGLE_OAUTH_SYAFRI_SECRET, process.env.GOOGLE_OAUTH_SYAFRI_URL + ':8101/google'
+        process.env.GOOGLE_OAUTH_ID, process.env.GOOGLE_OAUTH_SECRET, process.env.GOOGLE_OAUTH_URL
     );
     return oAuth2Client;
 }
@@ -156,9 +156,10 @@ exports.getAccessTokenUrl = function (oAuth2Client){
     const authUrl = oAuth2Client.generateAuthUrl({
         access_type: 'offline',
         scope: SCOPES,
+        prompt: 'consent',
     });
     return {
-        "responseCode": process.env.NOTFOUND_RESPONSE,
+        "responseCode": process.env.UNAUTHORIZED_RESPONSE,
         "responseMessage": "Please login to google first",
         "data": {
             "url": authUrl
@@ -188,17 +189,17 @@ async function getToken (id) {
         let queryParams = {
             employeeId: id
         };
-        mongoose.Promise = global.Promise;
-        await mongoose.connect(mongoConf.mongoDb.url);
+        // mongoose.Promise = global.Promise;
+        // await mongoose.connect(mongoConf.mongoDb.url);
         var query = await schema.findOne(queryParams);
         if (query === null) {
             return false;
         } else {
-            console.log("GET NOTIF SUCCESS ", query)
+            console.log("getToken: ", query)
             return query.token;
         }
     } catch (error) {
-        console.log("error create notif", error);
+        console.log("getToken: ", error);
         return false
     }
 }
@@ -228,7 +229,7 @@ exports.createGoogleToken = function(data, oAuth2Client) {
             console.log('error: ', error);
             response = {
                 "responseCode": process.env.ERRORINTERNAL_RESPONSE,
-                "responseMessage": "Something wrong with your code"
+                "responseMessage": "Something wrong please check your google code!!"
             }
         }
         resolve(response);
@@ -236,7 +237,7 @@ exports.createGoogleToken = function(data, oAuth2Client) {
 }
 
 async function saveToken(employeeId, token){
-    await mongoose.connect(mongoConf.mongoDb.url);
+    // await mongoose.connect(mongoConf.mongoDb.url);
     var googleToken = new schema({
         employeeId: employeeId,
         token: token
@@ -395,6 +396,151 @@ exports.getAddressCoordinate = function (data) {
                 "responseCode": process.env.ERRORINTERNAL_RESPONSE,
                 "responseMessage": "Something wrong please try again!!"
             });
+        }
+    })
+}
+
+exports.listEmails = function(auth, param){
+    return new Promise(async function(resolve, reject){
+        let response = {}
+        try {
+            const gmail = google.gmail({version: 'v1', auth});
+            gmail.users.messages.list(param, async (err, res) => {
+                if (err) {
+                    console.log('The API returned an error: ' + err);
+                    return resolve({
+                        "responseCode": process.env.ERRORINTERNAL_RESPONSE,
+                        "responseMessage": "Something wrong with pelase try again!!"
+                    });
+                }
+                let result = [];
+                const messages = res.data.messages
+                console.log("message: ", messages);
+                for(let message of messages){
+                    let email = await getEmailBody(gmail, message.id);
+                    if (email) {
+                        result.push({
+                            "id": message.id,
+                            "src": email.src,
+                            "from": email.from
+                        })
+                    }
+                }
+                response = {
+                    "responseCode": process.env.SUCCESS_RESPONSE,
+                    "responseMessage": "success!!",
+                    "data": result
+                }
+                resolve(response);
+            });
+        } catch (error) {
+            console.log('error: ', error);
+            response = {
+                "responseCode": process.env.ERRORINTERNAL_RESPONSE,
+                "responseMessage": "Something wrong with pelase try again!!"
+            }
+            resolve(response);
+        }
+    })
+}
+
+exports.getEmail = function(auth, param){
+    return new Promise(async function(resolve, reject){
+        let response = {}
+        try {
+            const gmail = google.gmail({version: 'v1', auth});
+            let email = await getEmailBody(gmail, param.id);
+            response = {
+                "responseCode": process.env.SUCCESS_RESPONSE,
+                "responseMessage": "success!!",
+                "data": email
+            }
+        } catch (error) {
+            console.log('error: ', error);
+            response = {
+                "responseCode": process.env.ERRORINTERNAL_RESPONSE,
+                "responseMessage": "Something wrong with pelase try again!!"
+            }
+        }
+        resolve(response);
+    })
+}
+
+function getEmailBody (gmail, id) {
+    return new Promise(async function(resolve){
+        try {
+            gmail.users.messages.get({
+                userId: 'me',
+                id: id
+            }, (err, res) => {
+                if (err) {
+                    console.log('The API returned an error: ' + err);
+                    return resolve({
+                        "responseCode": process.env.ERRORINTERNAL_RESPONSE,
+                        "responseMessage": "Something wrong with pelase try again!!"
+                    });
+                }
+                let sender = res.data.payload.headers.find(obj => {
+                    return obj.name === 'From'
+                })
+                console.log("getEmailBody: ", res.data.labelIds);
+                // let mail = res.data.payload.body.data;
+                try {
+                    let mail = res.data.payload.parts[0].body.data;
+                    if (mail) {
+                        let data = {
+                            src: new Buffer.from(mail, "base64").toString().replace(/\r?\n|\r/g, ''),
+                            from: sender.value    
+                        } 
+                        // console.log("res: ", data);
+                        resolve(data);
+                    }
+                    resolve(false)    
+                } catch (error) {
+                    resolve(false);
+                }
+            })
+        } catch (error) {
+            resolve(false)
+        }
+    })
+}
+
+exports.updateEmail = function (auth, param){
+    return new Promise(async function(resolve, reject){
+        let response = {}
+        try {
+            const gmail = google.gmail({version: 'v1', auth});
+            gmail.users.messages.modify(param, async (err, res) => {
+                if (err) {
+                    console.log('The API returned an error: ' + err);
+                    return resolve({
+                        "responseCode": process.env.ERRORINTERNAL_RESPONSE,
+                        "responseMessage": "Something wrong with pelase try again!!"
+                    });
+                }
+                console.log("modify: ", res);
+                if (res.status == 200) {
+                    response = {
+                        "responseCode": process.env.SUCCESS_RESPONSE,
+                        "responseMessage": "success!!"
+                    }    
+                }
+                else {
+                    response = {
+                        "responseCode": res.status + "",
+                        "responseMessage": "shometing where wrong!!"
+                    }
+                }
+                resolve(response);
+            });
+        } catch (error) {
+            console.log('error: ', error);
+            response = {
+                "responseCode": process.env.ERRORINTERNAL_RESPONSE,
+                "responseMessage": "Something wrong with pelase try again!!"
+            }
+            resolve(response);
         }
     })
 }
