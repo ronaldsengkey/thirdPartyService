@@ -227,6 +227,77 @@ paths:
           description: "internal server error"
       x-swagger-router-controller: "google"
 
+  /trello/auth:
+    get:
+      tags:
+      - "google check auth"
+      summary: "google check auth"
+      operationId: "getAuthData"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+      - name: "employeeId"
+        in: "query"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "request success"
+        406:
+          description: "request"
+        500:
+          description: "internal server error"
+      x-swagger-router-controller: "trello"
+    post:
+      tags:
+      - "Google code for save token"
+      summary: "Create New Schedule of Presentation"
+      operationId: "postAuthData"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              required: true
+              $ref: '#/components/schemas/createToken'
+        required: true        
+      responses:
+        200:
+          description: "request success"
+        406:
+          description: "request"
+        500:
+          description: "internal server error"
+      x-swagger-router-controller: "trello"
+
+  /trello/board:
+    get:
+      tags:
+      - "google check auth"
+      summary: "google check auth"
+      operationId: "getBoard"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+      - name: "employeeId"
+        in: "query"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "request success"
+        406:
+          description: "request"
+        500:
+          description: "internal server error"
+      x-swagger-router-controller: "trello"
+
 components:
   schemas:
     updateGoogleEmail:
@@ -282,6 +353,16 @@ components:
         #   type: "string"
         #   example: "1,2,3"
         code:
+          type: "string"
+          example: "4/ygFmQxktObX5LqwBm6n-_FAqysR_vbK5ZcUgiFoSf5NTgikMM0XqgQfBeaU64Lp_m5Srz0v21s_ZXw03kTYDnuM"
+
+    createToken:
+      type: "object"
+      properties:
+        employeeId:
+          type: "string"
+          example: "1,2,3"
+        token:
           type: "string"
           example: "4/ygFmQxktObX5LqwBm6n-_FAqysR_vbK5ZcUgiFoSf5NTgikMM0XqgQfBeaU64Lp_m5Srz0v21s_ZXw03kTYDnuM"
 
