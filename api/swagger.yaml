@@ -297,7 +297,227 @@ paths:
         500:
           description: "internal server error"
       x-swagger-router-controller: "trello"
+    put:
+      tags:
+      - "google check auth"
+      summary: "google check auth"
+      operationId: "updateBoard"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              required: false
+              $ref: '#/components/schemas/trelloBoard'
+        required: true
+      responses:
+        200:
+          description: "request success"
+        406:
+          description: "request"
+        500:
+          description: "internal server error"
+      x-swagger-router-controller: "trello"
+    delete:
+      tags:
+      - "google check auth"
+      summary: "google check auth"
+      operationId: "deleteBoard"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              required: false
+              $ref: '#/components/schemas/trelloBoard'
+        required: true
+      responses:
+        200:
+          description: "request success"
+        406:
+          description: "request"
+        500:
+          description: "internal server error"
+      x-swagger-router-controller: "trello"
 
+  /trello/list:
+    get:
+      tags:
+      - "google check auth"
+      summary: "google check auth"
+      operationId: "getList"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+      - name: "employeeId"
+        in: "query"
+        required: true
+        type: "string"
+      - name: "boardId"
+        in: "query"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "request success"
+        406:
+          description: "request"
+        500:
+          description: "internal server error"
+      x-swagger-router-controller: "trello"
+    put:
+      tags:
+      - "google check auth"
+      summary: "google check auth"
+      operationId: "updateList"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              required: false
+              $ref: '#/components/schemas/trelloBoard'
+        required: true
+      responses:
+        200:
+          description: "request success"
+        406:
+          description: "request"
+        500:
+          description: "internal server error"
+      x-swagger-router-controller: "trello"
+    delete:
+      tags:
+      - "google check auth"
+      summary: "google check auth"
+      operationId: "deleteList"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              required: false
+              $ref: '#/components/schemas/trelloBoard'
+        required: true
+      responses:
+        200:
+          description: "request success"
+        406:
+          description: "request"
+        500:
+          description: "internal server error"
+      x-swagger-router-controller: "trello"
+
+  /trello/card:
+    get:
+      tags:
+      - "google check auth"
+      summary: "google check auth"
+      operationId: "getCard"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+      - name: "employeeId"
+        in: "query"
+        required: true
+        type: "string"
+      - name: "listId"
+        in: "query"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "request success"
+        406:
+          description: "request"
+        500:
+          description: "internal server error"
+      x-swagger-router-controller: "trello"
+    put:
+      tags:
+      - "google check auth"
+      summary: "google check auth"
+      operationId: "updateCard"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              required: false
+              $ref: '#/components/schemas/trelloBoard'
+        required: true
+      responses:
+        200:
+          description: "request success"
+        406:
+          description: "request"
+        500:
+          description: "internal server error"
+      x-swagger-router-controller: "trello"
+    delete:
+      tags:
+      - "google check auth"
+      summary: "google check auth"
+      operationId: "deleteCard"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              required: false
+              $ref: '#/components/schemas/trelloBoard'
+        required: true
+      responses:
+        200:
+          description: "request success"
+        406:
+          description: "request"
+        500:
+          description: "internal server error"
+      x-swagger-router-controller: "trello"
+
+  /trello/sync:
+    get:
+      tags:
+      - "google check auth"
+      summary: "google check auth"
+      operationId: "getSync"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+      - name: "params"
+        in: "header"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "request success"
+        406:
+          description: "request"
+        500:
+          description: "internal server error"
+      x-swagger-router-controller: "trello"
 components:
   schemas:
     updateGoogleEmail:
@@ -365,6 +585,16 @@ components:
         token:
           type: "string"
           example: "4/ygFmQxktObX5LqwBm6n-_FAqysR_vbK5ZcUgiFoSf5NTgikMM0XqgQfBeaU64Lp_m5Srz0v21s_ZXw03kTYDnuM"
+    
+    trelloBoard:
+      type: "object"
+      properties:
+        employeeId:
+          type: "string"
+        boardId:
+          type: "string"
+        name:
+          type: "string"
 
     # consumerSchema:
     #   type: object

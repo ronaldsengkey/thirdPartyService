@@ -4,7 +4,7 @@ exports.sentRequest = function(options){
     return new Promise(async function(resolve){
         request(options, function (error, response) {
             try {
-                console.log('response.body::', response.body);
+                console.log('response::', response);
                 if (error){
                     console.log("error::", error);
                     return resolve(false)
@@ -12,7 +12,8 @@ exports.sentRequest = function(options){
                 try {
                     return resolve(JSON.parse(response.body))
                 } catch (error) {
-                    return response.body;
+                    console.log("error::", error);
+                    return resolve(response.body);
                 }
             } catch (error) {
                 console.log("error::", error);
