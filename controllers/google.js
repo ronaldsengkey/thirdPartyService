@@ -123,21 +123,21 @@ module.exports.getGoogleCalendarEvent = async function getGoogleCalendarEvent(re
 }
 
 module.exports.getAddressCoordinate = async function getAddressCoordinate(req, res, next){
-    var token = req.swagger.params['token'].value;
+    // var token = req.swagger.params['token'].value;
     let body = JSON.parse(req.swagger.params['param'].value);
     try {
-      let ceto = await account.checkToken(token);
-      if (ceto.responseCode == process.env.SUCCESS_RESPONSE) {
+    //   let ceto = await account.checkToken(token);
+    //   if (ceto.responseCode == process.env.SUCCESS_RESPONSE) {
           //validasi belum          
           let a = await googleApi.getAddressCoordinate(body)
           utils.writeJson(res, a);
-      } else {
-          let response = {
-              "responseCode": process.env.UNAUTHORIZED_RESPONSE,
-              "responseMessage": "Please login first!"
-          };
-          utils.writeJson(res, response);
-      }
+    //   } else {
+    //       let response = {
+    //           "responseCode": process.env.UNAUTHORIZED_RESPONSE,
+    //           "responseMessage": "Please login first!"
+    //       };
+    //       utils.writeJson(res, response);
+    //   }
     } catch (err) {
         console.log(err);
         let response = {

@@ -370,8 +370,8 @@ exports.getAddressCoordinate = function (data) {
                 if (error) {
                     reject(process.env.ERRORINTERNAL_RESPONSE);
                 }
+                console.log('getAddressCoordinate::', body)
                 let result = JSON.parse(body);
-                console.log('RESULT CHECK TOKEN => ', result)
                 if (result.status == "OK") {
                     resolve({
                         "responseCode": process.env.SUCCESS_RESPONSE,
