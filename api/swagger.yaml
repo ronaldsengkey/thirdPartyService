@@ -189,6 +189,10 @@ paths:
         in: "header"
         required: true
         type: "string"
+      - name: "hostname"
+        in: "header"
+        required: true
+        type: "string"
       requestBody:
         content:
           '*/*':
@@ -215,6 +219,10 @@ paths:
       - "application/json"
       parameters:
       - name: "employeeId"
+        in: "header"
+        required: true
+        type: "string"
+      - name: "hostname"
         in: "header"
         required: true
         type: "string"

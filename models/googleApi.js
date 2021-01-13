@@ -145,9 +145,9 @@ const TOKEN_PATH = 'token.json';
 //     });
 // }
 
-exports.getAuth2Client = function(){
+exports.getAuth2Client = function(hostname = 'http://localhost:8100'){
     const oAuth2Client = new google.auth.OAuth2(
-        process.env.GOOGLE_OAUTH_ID, process.env.GOOGLE_OAUTH_SECRET, process.env.GOOGLE_OAUTH_URL
+        process.env.GOOGLE_OAUTH_ID, process.env.GOOGLE_OAUTH_SECRET, hostname + process.env.GOOGLE_OAUTH_URL
     );
     return oAuth2Client;
 }
@@ -159,7 +159,7 @@ exports.getAccessTokenUrl = function (oAuth2Client){
         prompt: 'consent',
     });
     return {
-        "responseCode": process.env.UNAUTHORIZED_RESPONSE,
+        "responseCode": process.env.EXPIRED_TOKEN_RESPONSE,
         "responseMessage": "Please login to google first",
         "data": {
             "url": authUrl
@@ -413,23 +413,32 @@ exports.listEmails = function(auth, param){
                         "responseMessage": "Something wrong with pelase try again!!"
                     });
                 }
+                // console.log('res::', res);
                 let result = [];
                 const messages = res.data.messages
                 console.log("message: ", messages);
-                for(let message of messages){
-                    let email = await getEmailBody(gmail, message.id);
-                    if (email) {
-                        result.push({
-                            "id": message.id,
-                            "src": email.src,
-                            "from": email.from
-                        })
+                if (!messages) {
+                    response = {
+                        "responseCode": process.env.NOTFOUND_RESPONSE,
+                        "responseMessage": "Notfound!!"
                     }
                 }
-                response = {
-                    "responseCode": process.env.SUCCESS_RESPONSE,
-                    "responseMessage": "success!!",
-                    "data": result
+                else {
+                    for(let message of messages){
+                        let email = await getEmailBody(gmail, message.id);
+                        if (email) {
+                            result.push({
+                                "id": message.id,
+                                "src": email.src,
+                                "from": email.from
+                            })
+                        }
+                    }
+                    response = {
+                        "responseCode": process.env.SUCCESS_RESPONSE,
+                        "responseMessage": "success!!",
+                        "data": result
+                    }
                 }
                 resolve(response);
             });

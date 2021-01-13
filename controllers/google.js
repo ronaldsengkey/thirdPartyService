@@ -9,9 +9,10 @@ const account = require('../config/account');
 module.exports.checkGoogleToken = async function checkGoogleToken(req, res, next){
     try {
         const employeeId = req.swagger.params['employeeId'].value;
+        const hostname = req.swagger.params['hostname'].value;
         let body = {};
         body.employeeId = employeeId;
-        let oAuth2Client = await googleApi.getAuth2Client(body.employeeId);
+        let oAuth2Client = await googleApi.getAuth2Client(hostname);
         // console.log("oAuth2Client: ", oAuth2Client);
         let auth = await googleApi.getAuthorize(body.employeeId, oAuth2Client);
         // console.log("auth: ", auth);
@@ -39,10 +40,11 @@ module.exports.checkGoogleToken = async function checkGoogleToken(req, res, next
 module.exports.createGoogleToken = async function createGoogleToken(req, res, next){
     try {
         const employeeId = req.swagger.params['employeeId'].value;
+        const hostname = req.swagger.params['hostname'].value;
         let body = req.body;   
         console.log("body: ", body); 
         body.employeeId = employeeId;
-        let oAuth2Client = await googleApi.getAuth2Client(body.employeeId);
+        let oAuth2Client = await googleApi.getAuth2Client(hostname);
         console.log("oAuth2Client: ", oAuth2Client);
         let a = await googleApi.createGoogleToken(body, oAuth2Client);
         utils.writeJson(res, a);
