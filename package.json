@@ -33,8 +33,10 @@
     "oas3-tools": "^1.0.1",
     "pg": "^7.17.0",
     "pino-pretty": "^3.4.0",
+    "qrcode": "^1.4.4",
     "redis": "^3.0.2",
     "request": "^2.88.2",
-    "socket.io": "^2.3.0"
+    "socket.io": "^2.3.0",
+    "speakeasy": "^2.0.0"
   }
 }

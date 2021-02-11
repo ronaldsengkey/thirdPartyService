@@ -150,6 +150,36 @@ module.exports.getAddressCoordinate = async function getAddressCoordinate(req, r
     }
 }
 
+module.exports.getAuthentiatorQr = async function getAuthentiatorQr(req, res, next){
+    try {
+        let body = JSON.parse(req.swagger.params['param'].value);       
+        let a = await googleApi.getAuthentiatorQr(body)
+        utils.writeJson(res, a);
+    } catch (err) {
+        console.log(err);
+        let response = {
+            "responseCode": process.env.ERRORINTERNAL_RESPONSE,
+            "responseMessage": "Something wrong please try again!!"
+        };
+        utils.writeJson(res, response);
+    }
+}
+
+module.exports.postGoogleAuthenticator = async function postGoogleAuthenticator(req, res){
+    try {
+        let body = req.body;       
+        let a = await googleApi.postGoogleAuthenticator(body)
+        utils.writeJson(res, a);
+    } catch (err) {
+        console.log(err);
+        let response = {
+            "responseCode": process.env.ERRORINTERNAL_RESPONSE,
+            "responseMessage": "Something wrong please try again!!"
+        };
+        utils.writeJson(res, response);
+    }
+}
+
 module.exports.getGoogleEmail = async function getGoogleEmail(req, res, next){
     try {
         const employeeId = req.swagger.params['employeeId'].value;

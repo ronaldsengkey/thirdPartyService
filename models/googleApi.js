@@ -6,8 +6,11 @@ const {google} = require('googleapis');
 const mongoose = require('mongoose').set('debug', true);
 const mongoConf = require('../config/mongo');
 const schema = require('../service/googleTokenSchema');
+const googleAuthSchema = require('../service/googleAuthenticatorSchema');
 const moment = require('moment');
 const request = require('request');
+const speakeasy = require("speakeasy");
+const qrcode = require("qrcode");
 
 // If modifying these scopes, delete token.json.
 const SCOPES = ['https://www.googleapis.com/auth/calendar', 'https://www.googleapis.com/auth/gmail.modify'];
@@ -395,6 +398,101 @@ exports.getAddressCoordinate = function (data) {
             reject({
                 "responseCode": process.env.ERRORINTERNAL_RESPONSE,
                 "responseMessage": "Something wrong please try again!!"
+            });
+        }
+    })
+}
+
+exports.getAuthentiatorQr = function (data){
+    return new Promise(async function(resolve){
+        let secret;
+        let exist = await getAuthSecret(data);
+        if (exist) {
+            secret = JSON.parse(exist);
+        } else {
+            secret = await speakeasy.generateSecret({
+                name: "UltiAccess(" + data.email + "-" + data.accountCategory + ")",
+            });
+            data.secret = JSON.stringify(secret);
+            await saveAuthSecret(data)
+        }
+        console.log(secret);
+        qrcode.toDataURL(secret.otpauth_url, function (error, result) {
+            if (error) {
+                console.log("getAuthentiatorQr::", error);
+                return resolve({
+                    "responseCode": process.env.ERRORINTERNAL_RESPONSE,
+                    "responseMessage": "Something wrong with pelase try again!!"
+                });
+            }
+            let response = {
+                "responseCode": process.env.SUCCESS_RESPONSE,
+                "responseMessage": "Success",
+                "data": {
+                    qrcode: result,
+                }
+            //   secret: secret.base32 + data.phone_code + data.phone,
+            //   type: "authenticator",
+            };
+            resolve(response);
+        });
+    })
+}
+
+async function getAuthSecret (data) {
+    try {
+        let queryParams = {
+            accountId: data.accountId,
+            accountCategory: data.accountCategory,
+        };
+        // mongoose.Promise = global.Promise;
+        // await mongoose.connect(mongoConf.mongoDb.url);
+        var query = await googleAuthSchema.findOne(queryParams);
+        if (query === null) {
+            return false;
+        } else {
+            console.log("getAuthSecret: ", query)
+            return query.secret;
+        }
+    } catch (error) {
+        console.log("getAuthSecret: ", error);
+        return false
+    }
+}
+
+async function saveAuthSecret(data){
+    // await mongoose.connect(mongoConf.mongoDb.url);
+    var googleSecret = new googleAuthSchema(data);
+    await googleSecret.save();
+    return googleSecret;
+}
+
+exports.postGoogleAuthenticator = function (data){
+    return new Promise(async function(resolve){
+        let exist = await getAuthSecret(data);
+        if (exist) {
+            secret = JSON.parse(exist);
+            let verified = speakeasy.totp.verify({
+                secret: secret.base32,
+                encoding: "base32",
+                token: Number(data.token),
+            });
+            if (verified) {
+                return resolve({
+                    "responseCode": process.env.SUCCESS_RESPONSE,
+                    "responseMessage": "Success"
+                });
+            } else {
+                return resolve({
+                    "responseCode": process.env.NOTACCEPT_RESPONSE,
+                    "responseMessage": "NotAccepted"
+                });
+            }
+        }
+        else {
+            return resolve({
+                "responseCode": process.env.NOTFOUND_RESPONSE,
+                "responseMessage": "Notfound"
             });
         }
     })

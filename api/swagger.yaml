@@ -147,6 +147,53 @@ paths:
           description: "internal server error"
       x-swagger-router-controller: "google"
 
+  /google/authenticator:
+    get:
+      tags:
+      - "google get lat long"
+      summary: "google get long"
+      operationId: "getAuthentiatorQr"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+      - name: "param"
+        in: "header"
+        required: true
+        type: "string"
+        description: '{ "email": "admin_uki@usahakreatif.co.id", "accountCategory": "employee" }'
+      responses:
+        200:
+          description: "request success"
+        406:
+          description: "request"
+        500:
+          description: "internal server error"
+      x-swagger-router-controller: "google"
+
+    post:
+      tags:
+      - "google get lat long"
+      summary: "google get long"
+      operationId: "postGoogleAuthenticator"
+      produces:
+      - "application/xml"
+      - "application/json"
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              required: true
+              $ref: '#/components/schemas/postGoogleAuthenticator'
+      responses:
+        200:
+          description: "request success"
+        406:
+          description: "request"
+        500:
+          description: "internal server error"
+      x-swagger-router-controller: "google"
+
   /google/maps:
     get:
       tags:
@@ -573,7 +620,20 @@ components:
         email:
           type: "string"
           example: "safriansah@gmail.com"
-        
+    
+    postGoogleAuthenticator:
+      type: "object"
+      properties:
+        accountId:
+          type: "string"
+          example: "1,2,3"
+        accountCategory:
+          type: "string"
+          example: "employee"
+        token:
+          type: "string"
+          example: "867123"
+          
     createGoogleToken:
       type: "object"
       properties:
