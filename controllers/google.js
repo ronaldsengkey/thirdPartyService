@@ -230,7 +230,7 @@ module.exports.updateGoogleEmail = async function getGoogleEmail(req, res, next)
         
         let auth = await googleApi.getAuthorize(body.employeeId, oAuth2Client);
         // console.log("auth: ", auth);
-        
+        console.log("updateGoogleEmail::", body);
         let a = await googleApi.updateEmail(auth, body)
         utils.writeJson(res, a);
     } catch (err) {

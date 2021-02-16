@@ -614,6 +614,7 @@ function getEmailBody (gmail, id) {
 }
 
 exports.updateEmail = function (auth, param){
+    console.log("updateEmail::", param);
     return new Promise(async function(resolve, reject){
         let response = {}
         try {
