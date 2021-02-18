@@ -16,7 +16,7 @@ async function getMessage (id) {
             ]
         };
         mongoose.Promise = global.Promise;
-        await mongoose.connect(mongoConf.mongoDb.url);
+        // await mongoose.connect(mongoConf.mongoDb.url);
         var query = await schema.find(queryParams).sort({
             'created_at': 1
         })
@@ -45,7 +45,7 @@ async function findMessage (data) {
             ]
         };
         mongoose.Promise = global.Promise;
-        await mongoose.connect(mongoConf.mongoDb.url);
+        // await mongoose.connect(mongoConf.mongoDb.url);
         var query = await schema.find(queryParams).sort({
             'created_at': 1
         })
@@ -67,7 +67,7 @@ async function findOneMessage (id) {
             "_id": id
         };
         mongoose.Promise = global.Promise;
-        await mongoose.connect(mongoConf.mongoDb.url);
+        // await mongoose.connect(mongoConf.mongoDb.url);
         var query = await schema.find(queryParams).sort({
             'created_at': 1
         })
@@ -85,7 +85,7 @@ async function findOneMessage (id) {
 
 async function createMessage (data) {
     try {
-        await mongoose.connect(mongoConf.mongoDb.url);
+        // await mongoose.connect(mongoConf.mongoDb.url);
         var message = new schema({
             senderId: data.senderId,
             receiverId: data.receiverId,
