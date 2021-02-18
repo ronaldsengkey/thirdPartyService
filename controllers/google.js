@@ -59,6 +59,7 @@ module.exports.createGoogleToken = async function createGoogleToken(req, res, ne
 }
   
 module.exports.createGoogleCalendarEvent = async function createGoogleCalendarEvent(req, res, next){
+    console.log("createGoogleCalendarEvent::");
     var token = req.swagger.params['token'].value;
     let body = req.body;
     try {
@@ -67,10 +68,10 @@ module.exports.createGoogleCalendarEvent = async function createGoogleCalendarEv
             //validasi belum
             body.employeeId = ceto.data.employee_id;
             let oAuth2Client = await googleApi.getAuth2Client(body.employeeId);
-            // console.log("oAuth2Client: ", oAuth2Client);
+            console.log("oAuth2Client: ", oAuth2Client);
             
             let auth = await googleApi.getAuthorize(body.employeeId, oAuth2Client);
-            // console.log("auth: ", auth);
+            console.log("auth: ", auth);
             
             let a = await googleApi.insertEvent(body, auth);
             utils.writeJson(res, a);
