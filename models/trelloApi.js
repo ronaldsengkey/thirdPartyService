@@ -4,7 +4,7 @@ const url = process.env.TRELLO_HOST;
 const trelloKey = process.env.TRELLO_KEY;
 
 exports.getLoginUrl = function(){
-    return url + '/authorize?expiration=never&name=ultipayProman&scope=read,write&response_type=token&persist=true&key=' + trelloKey;
+    return url + '/authorize?expiration=never&name=Ultimate Proman&scope=read,write&response_type=token&persist=true&key=' + trelloKey;
 }
 
 exports.saveToken = async function(data){
