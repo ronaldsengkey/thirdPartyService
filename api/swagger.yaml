@@ -20,7 +20,58 @@ tags:
   description: Consumer Message
 basePath: "/thirdparty"
 paths:
+  /onesignal/account:
+    post:
+      tags:
+      - "get email"
+      summary: "Get email"
+      operationId: "postAccount"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+        requestBody:
+          content:
+            '*/*':
+              schema:
+                required: false
+                $ref: '#/components/schemas/registerOneSignalAccount'
+          required: false 
+      responses:
+        200:
+          description: "request success"
+        406:
+          description: "request"
+        500:
+          description: "internal server error"
+      x-swagger-router-controller: "oneSignal"
   
+  /onesignal/send:
+    post:
+      tags:
+      - "get email"
+      summary: "Get email"
+      operationId: "sendNotification"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+        requestBody:
+          content:
+            '*/*':
+              schema:
+                required: false
+                $ref: '#/components/schemas/sendNotifOneSignal'
+          required: false 
+      responses:
+        200:
+          description: "request success"
+        406:
+          description: "request"
+        500:
+          description: "internal server error"
+      x-swagger-router-controller: "oneSignal"
+    
   /google/email:
     get:
       tags:
@@ -633,7 +684,31 @@ components:
         token:
           type: "string"
           example: "867123"
-          
+
+    sendNotifOneSignal:
+      type: "object"
+      properties:
+        account_id:
+          type: "string"
+        account_name:
+          type: "string"
+        account_category:
+          type: "string"
+        player_id:
+          type: "string"
+
+    registerOneSignalAccount:
+      type: "object"
+      properties:
+        account_id:
+          type: "string"
+        account_name:
+          type: "string"
+        account_category:
+          type: "string"
+        player_id:
+          type: "string"
+
     createGoogleToken:
       type: "object"
       properties:
