@@ -49,7 +49,7 @@ exports.sendNotification = function(data){
                     "en": data.content
                 },
                 "url": data.url,
-                "chrome_icon": (data.image ? data.image : process.env.ONESIGNAL_IMAGE),
+                "chrome_web_icon": (data.image ? data.image : process.env.ONESIGNAL_IMAGE),
                 "firefox_icon": (data.image ? data.image : process.env.ONESIGNAL_IMAGE)
             }
             return resolve(await sendNotificationRequest(body));
