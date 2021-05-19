@@ -72,6 +72,32 @@ paths:
           description: "internal server error"
       x-swagger-router-controller: "oneSignal"
     
+  /slack/send:
+    post:
+      tags:
+      - "send to slack"
+      summary: "Get email"
+      operationId: "sendNotification"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+        requestBody:
+          content:
+            '*/*':
+              schema:
+                required: false
+                $ref: '#/components/schemas/slackNotif'
+          required: false 
+      responses:
+        200:
+          description: "request success"
+        406:
+          description: "request"
+        500:
+          description: "internal server error"
+      x-swagger-router-controller: "slack"
+    
   /google/email:
     get:
       tags:
@@ -739,32 +765,9 @@ components:
         name:
           type: "string"
 
-    # consumerSchema:
-    #   type: object
-    #   properties:
-    #     content:
-    #       type: string
-  # securitySchemes:
-  #   petstore_auth:
-  #     type: oauth2
-  #     flows:
-  #       implicit:
-  #         authorizationUrl: http://petstore.swagger.io/oauth/dialog
-  #         scopes:
-  #           write:pets: modify pets in your account
-  #           read:pets: read your pets
-  #   secret_key:
-  #     type: apiKey
-  #     name: SecretKey
-  #     in: header
-  #   oauth_auth:
-  #     type: oauth2
-  #     flows:
-  #       implicit:
-  #         authorizationUrl: https://www.linkedin.com/in/yohanes-ronald-agnetius-sengkey-lee-b174a940/
-  #         scopes:
-  #           read:auth: read authentication
-  #   state:
-  #     type: apiKey
-  #     name: state
-  #     in: header
+    slackNotif:
+      type: "object"
+      properties:
+        text:
+          type: "string"
+          example: "Hello, \nWorld!"
