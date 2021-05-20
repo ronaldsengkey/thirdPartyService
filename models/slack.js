@@ -4,7 +4,11 @@ const url = process.env.SLACK_URL;
 exports.sendNotification = async function(data){
     try {
         let response = [];
-        let urls = url.split(",");
+        // let urls = url.split(",");
+        let urls = data.url.split(",");
+        let body = {
+            "text": data.text
+        }
         for(let dataUrl of urls){
             const options = {
                 'method': 'POST',
@@ -12,7 +16,7 @@ exports.sendNotification = async function(data){
                 'headers': {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(data)
+                body: JSON.stringify(body)
             };
             response.push(await sentRequest(options));
         }
