@@ -191,6 +191,8 @@ oas3Tools.initializeMiddleware(swaggerDoc, function (middleware) {
   // Start the server
     const start = async () => {
       try {
+        let telegram = require('./config/telegramBot');
+        console.log("telegram::", telegram);
         mongoose.connect(mongoConf.mongoDb.url, {
           useNewUrlParser: true
         }).then(function (e) {
@@ -199,8 +201,8 @@ oas3Tools.initializeMiddleware(swaggerDoc, function (middleware) {
         // const socketUsers = {};
         const clients = {};
         const account = {};
-        const socket = require('./socket');
-        await socket.openSocket();
+        // const socket = require('./socket');
+        // await socket.openSocket();
         // ============================= SOCKET IO ===============================
         await fastify.listen(serverPort, '0.0.0.0');
         fastify.log.info();

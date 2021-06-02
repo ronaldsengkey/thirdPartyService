@@ -20,6 +20,58 @@ tags:
   description: Consumer Message
 basePath: "/thirdparty"
 paths:
+  /telegram/send:
+    post:
+      tags:
+        - "send telegram message"
+      summary: "send message"
+      operationId: "sendNotification"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+        requestBody:
+          content:
+            '*/*':
+              schema:
+                required: false
+                $ref: '#/components/schemas/slackNotif'
+          required: false 
+      responses:
+        200:
+          description: "request success"
+        406:
+          description: "request"
+        500:
+          description: "internal server error"
+      x-swagger-router-controller: "telegram"
+
+  /telegram/subscriber:
+    get:
+      tags:
+        - "send telegram message"
+      summary: "get subscriber"
+      operationId: "getSubscriber"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+        requestBody:
+          content:
+            '*/*':
+              schema:
+                required: false
+                $ref: '#/components/schemas/slackNotif'
+          required: false 
+      responses:
+        200:
+          description: "request success"
+        406:
+          description: "request"
+        500:
+          description: "internal server error"
+      x-swagger-router-controller: "telegram"
+
   /onesignal/account:
     post:
       tags:
