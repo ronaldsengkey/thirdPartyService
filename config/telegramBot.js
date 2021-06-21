@@ -1,6 +1,7 @@
 const TelegramBot = require('node-telegram-bot-api');
 const token = process.env.TELEGRAM_BOT_TOKEN;
 const botSchema = require('../service/telegramBotSchema');
+const helpdeskSchema = require('../service/helpdeskSchema');
 
 const bot = new TelegramBot(token, {polling: true});
 
@@ -12,7 +13,7 @@ bot.onText(/\/echo (.+)/, (msg, match) => {
 
     const chatId = msg.chat.id;
     const resp = match[1]; // the captured "whatever"
-
+    console.log("msg::", msg);
     // send back the matched "whatever" to the chat
     bot.sendMessage(chatId, resp);
 });
@@ -20,6 +21,8 @@ bot.onText(/\/echo (.+)/, (msg, match) => {
 // Listen for any kind of message. There are different kinds of
 // messages.
 bot.on('message', async (msg) => {
+    console.log("message::", msg);
+    let replyMessage = "Something wrong please try again";
     try {
         const chatId = msg.chat.id;
         const name = (msg.chat.username ? msg.chat.username : (msg.chat.title ? msg.chat.title : ""));
@@ -40,6 +43,22 @@ bot.on('message', async (msg) => {
         }
         let result = await botSchema.findOneAndUpdate(param, data, option);
         console.log("result::", result);
+        if (msg.text.includes('/help')) {
+            var helpdesk = new helpdeskSchema({
+                chatId: chatId,
+                type: "telegram",
+                text: msg.text,
+                from: msg.from.username,
+                raw: JSON.stringify(msg)
+            });
+            let save = await helpdesk.save();
+            if (save) {
+                replyMessage = "your message has been saved";
+            }
+            bot.sendMessage(chatId, replyMessage);
+        } else {
+            bot.sendMessage(chatId, "list available command:\n/help");
+        }
     } catch (error) {
         console.log("message::", error);
     }

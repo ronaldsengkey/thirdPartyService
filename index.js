@@ -19,6 +19,9 @@ const fastify = require('fastify')({
     prettyPrint: true 
   }
 })
+const slackBot = require('./config/slackBot');
+        slackBot.listenForEvents(fastify);
+        console.log("slackBot::", slackBot);
 var serverPort = process.env.PORT_APP;
 fastify.use(bodyParser.json());
 fastify.use(morgan('dev'));
@@ -191,13 +194,13 @@ oas3Tools.initializeMiddleware(swaggerDoc, function (middleware) {
   // Start the server
     const start = async () => {
       try {
-        let telegram = require('./config/telegramBot');
-        console.log("telegram::", telegram);
         mongoose.connect(mongoConf.mongoDb.url, {
           useNewUrlParser: true
         }).then(function (e) {
           console.log("MONGO CONNECTED");
         });
+        let telegramBot = require('./config/telegramBot');
+        console.log("telegramBot::", telegramBot);
         // const socketUsers = {};
         const clients = {};
         const account = {};
