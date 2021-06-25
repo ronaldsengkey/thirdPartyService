@@ -19,9 +19,6 @@ const fastify = require('fastify')({
     prettyPrint: true 
   }
 })
-const slackBot = require('./config/slackBot');
-        slackBot.listenForEvents(fastify);
-        console.log("slackBot::", slackBot);
 var serverPort = process.env.PORT_APP;
 fastify.use(bodyParser.json());
 fastify.use(morgan('dev'));
@@ -201,6 +198,9 @@ oas3Tools.initializeMiddleware(swaggerDoc, function (middleware) {
         });
         let telegramBot = require('./config/telegramBot');
         console.log("telegramBot::", telegramBot);
+        // const slackBot = require('./config/slackBot');
+        // slackBot.listenForEvents(fastify);
+        // console.log("slackBot::", slackBot);
         // const socketUsers = {};
         const clients = {};
         const account = {};
