@@ -7,7 +7,7 @@ const web = new WebClient(token)
 const helpdeskSchema = require('../service/helpdeskSchema');
 
 function listenForEvents(app) {
-    app.use('/', slackEvents.requestListener())
+    app.use('/thirdparty/slack/events', slackEvents.requestListener())
 
     slackEvents.on('app_mention', (event) => {
         console.log("app_mention::", event);
